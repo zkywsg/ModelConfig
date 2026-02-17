@@ -1,0 +1,22 @@
+{
+  "name": "modelconfig",
+  "version": "0.1.0",
+  "description": "Resolver-only configuration and capability resolver layer for AI providers",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "config.schema.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "clean": "node -e \"import('node:fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\""
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT"
+}
