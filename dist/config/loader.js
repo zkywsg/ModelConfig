@@ -7,6 +7,7 @@ const DEFAULT_FILES = [
     'modelconfig.yml',
     'modelconfig.json'
 ];
+const ENV_VAR_TOKEN = /\$\{([A-Z0-9_]+)\}/g;
 function resolveConfigPath(inputPath) {
     if (inputPath) {
         return resolve(inputPath);
@@ -40,12 +41,52 @@ function parseContent(content, filePath) {
         });
     }
 }
+function interpolateString(value, fieldPath) {
+    const fullMatch = value.match(/^\$\{([A-Z0-9_]+)\}$/);
+    if (fullMatch) {
+        const envName = fullMatch[1];
+        if (process.env[envName] === undefined) {
+            throw ModelConfigError.configInvalid(`Missing environment variable '${envName}'.`, {
+                env: envName,
+                field: fieldPath
+            });
+        }
+        return `env:${envName}`;
+    }
+    return value.replace(ENV_VAR_TOKEN, (_, envName)=>{
+        const envValue = process.env[envName];
+        if (envValue === undefined) {
+            throw ModelConfigError.configInvalid(`Missing environment variable '${envName}'.`, {
+                env: envName,
+                field: fieldPath
+            });
+        }
+        return envValue;
+    });
+}
+function interpolateEnvVariables(value, fieldPath = '$') {
+    if (typeof value === 'string') {
+        return interpolateString(value, fieldPath);
+    }
+    if (Array.isArray(value)) {
+        return value.map((item, index)=>interpolateEnvVariables(item, `${fieldPath}[${index}]`));
+    }
+    if (typeof value === 'object' && value !== null) {
+        const result = {};
+        for (const [key, item] of Object.entries(value)){
+            result[key] = interpolateEnvVariables(item, `${fieldPath}.${key}`);
+        }
+        return result;
+    }
+    return value;
+}
 export function loadConfig(inputPath) {
     const filePath = resolveConfigPath(inputPath);
     const content = readFileSync(filePath, 'utf8');
     const parsed = parseContent(content, filePath);
-    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    const interpolated = interpolateEnvVariables(parsed);
+    if (typeof interpolated !== 'object' || interpolated === null || Array.isArray(interpolated)) {
         throw ModelConfigError.configInvalid('Config root must be an object.');
     }
-    return parsed;
+    return interpolated;
 }
