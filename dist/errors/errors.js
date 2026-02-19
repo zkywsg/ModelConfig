@@ -12,6 +12,9 @@ export class ModelConfigError extends Error {
     static configInvalid(message, details) {
         return new ModelConfigError('CONFIG_INVALID', message, details);
     }
+    static envNotFound(message, details) {
+        return new ModelConfigError('ENV_NOT_FOUND', message, details);
+    }
 }
 export function isModelConfigError(error) {
     return error instanceof ModelConfigError;

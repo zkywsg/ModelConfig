@@ -22,6 +22,10 @@ export class ModelConfigError extends Error {
   static configInvalid(message: string, details?: Record<string, unknown>): ModelConfigError {
     return new ModelConfigError('CONFIG_INVALID', message, details);
   }
+
+  static envNotFound(message: string, details?: Record<string, unknown>): ModelConfigError {
+    return new ModelConfigError('ENV_NOT_FOUND', message, details);
+  }
 }
 
 export function isModelConfigError(error: unknown): error is ModelConfigError {
