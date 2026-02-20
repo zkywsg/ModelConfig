@@ -3,6 +3,7 @@ import { extname, resolve } from 'node:path';
 import { ModelConfigError } from '../errors/errors.ts';
 import type { ModelConfig } from '../types.ts';
 import { parseYaml } from './yaml.ts';
+import { validateConfig } from './validator.ts';
 
 const DEFAULT_FILES = ['modelconfig.yaml', 'modelconfig.yml', 'modelconfig.json'];
 const ENV_VAR_TOKEN = /\$\{([A-Z0-9_]+)\}/g;
@@ -100,9 +101,6 @@ export function loadConfig(inputPath?: string): ModelConfig {
   const parsed = parseContent(content, filePath);
   const interpolated = interpolateEnvVariables(parsed);
 
-  if (typeof interpolated !== 'object' || interpolated === null || Array.isArray(interpolated)) {
-    throw ModelConfigError.configInvalid('Config root must be an object.');
-  }
-
-  return interpolated as ModelConfig;
+  validateConfig(interpolated);
+  return interpolated;
 }

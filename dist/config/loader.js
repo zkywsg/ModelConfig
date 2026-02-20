@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { extname, resolve } from 'node:path';
 import { ModelConfigError } from '../errors/errors.js';
 import { parseYaml } from './yaml.js';
+import { validateConfig } from './validator.js';
 const DEFAULT_FILES = [
     'modelconfig.yaml',
     'modelconfig.yml',
@@ -85,8 +86,6 @@ export function loadConfig(inputPath) {
     const content = readFileSync(filePath, 'utf8');
     const parsed = parseContent(content, filePath);
     const interpolated = interpolateEnvVariables(parsed);
-    if (typeof interpolated !== 'object' || interpolated === null || Array.isArray(interpolated)) {
-        throw ModelConfigError.configInvalid('Config root must be an object.');
-    }
+    validateConfig(interpolated);
     return interpolated;
 }
