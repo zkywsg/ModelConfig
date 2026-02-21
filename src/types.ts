@@ -15,6 +15,12 @@ export interface EnvironmentConfig {
   models: Record<string, LogicalModelConfig>;
 }
 
+export interface LogicalModelResolution {
+  logical_model: string;
+  strategy: 'priority';
+  candidates: string[];
+}
+
 export interface ModelConfig {
   version: number;
   environments: Record<string, EnvironmentConfig>;

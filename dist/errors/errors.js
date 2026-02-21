@@ -15,6 +15,9 @@ export class ModelConfigError extends Error {
     static envNotFound(message, details) {
         return new ModelConfigError('ENV_NOT_FOUND', message, details);
     }
+    static modelNotFound(message, details) {
+        return new ModelConfigError('MODEL_NOT_FOUND', message, details);
+    }
 }
 export function isModelConfigError(error) {
     return error instanceof ModelConfigError;
