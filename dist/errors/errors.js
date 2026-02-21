@@ -18,6 +18,9 @@ export class ModelConfigError extends Error {
     static modelNotFound(message, details) {
         return new ModelConfigError('MODEL_NOT_FOUND', message, details);
     }
+    static aliasNotFound(message, details) {
+        return new ModelConfigError('ALIAS_NOT_FOUND', message, details);
+    }
 }
 export function isModelConfigError(error) {
     return error instanceof ModelConfigError;

@@ -30,6 +30,10 @@ export class ModelConfigError extends Error {
   static modelNotFound(message: string, details?: Record<string, unknown>): ModelConfigError {
     return new ModelConfigError('MODEL_NOT_FOUND', message, details);
   }
+
+  static aliasNotFound(message: string, details?: Record<string, unknown>): ModelConfigError {
+    return new ModelConfigError('ALIAS_NOT_FOUND', message, details);
+  }
 }
 
 export function isModelConfigError(error: unknown): error is ModelConfigError {
