@@ -21,6 +21,9 @@ export class ModelConfigError extends Error {
     static aliasNotFound(message, details) {
         return new ModelConfigError('ALIAS_NOT_FOUND', message, details);
     }
+    static providerNotConfigured(message, details) {
+        return new ModelConfigError('PROVIDER_NOT_CONFIGURED', message, details);
+    }
 }
 export function isModelConfigError(error) {
     return error instanceof ModelConfigError;

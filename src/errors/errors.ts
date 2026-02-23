@@ -34,6 +34,10 @@ export class ModelConfigError extends Error {
   static aliasNotFound(message: string, details?: Record<string, unknown>): ModelConfigError {
     return new ModelConfigError('ALIAS_NOT_FOUND', message, details);
   }
+
+  static providerNotConfigured(message: string, details?: Record<string, unknown>): ModelConfigError {
+    return new ModelConfigError('PROVIDER_NOT_CONFIGURED', message, details);
+  }
 }
 
 export function isModelConfigError(error: unknown): error is ModelConfigError {

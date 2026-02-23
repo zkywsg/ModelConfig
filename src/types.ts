@@ -21,6 +21,14 @@ export interface LogicalModelResolution {
   candidates: string[];
 }
 
+export interface ProviderTarget {
+  provider: string;
+  model: string;
+  provider_type: string;
+  base_url?: string;
+  credentials_ref?: string;
+}
+
 export interface ModelConfig {
   version: number;
   environments: Record<string, EnvironmentConfig>;
