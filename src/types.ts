@@ -29,6 +29,22 @@ export interface ProviderTarget {
   credentials_ref?: string;
 }
 
+export interface ResolveRequest {
+  model: string;
+  require?: string[];
+  env?: string;
+}
+
+export interface ResolveResult {
+  provider: string;
+  model: string;
+  base_url?: string;
+  credentials_ref?: string;
+  logical_model?: string;
+  env: string;
+  metadata?: Record<string, unknown>;
+}
+
 export interface ModelConfig {
   version: number;
   environments: Record<string, EnvironmentConfig>;
