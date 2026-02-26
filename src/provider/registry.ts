@@ -1,6 +1,8 @@
 import { ModelConfigError } from '../errors/errors.ts';
 import type { EnvironmentConfig, ProviderTarget } from '../types.ts';
 
+const OPENAI_DEFAULT_BASE_URL = 'https://api.openai.com/v1';
+
 function parseProviderModelRef(modelRef: string): { provider: string; model: string } {
   const separator = modelRef.indexOf(':');
 
@@ -34,7 +36,12 @@ export function resolveProviderTarget(envConfig: EnvironmentConfig, modelRef: st
     provider_type: providerConfig.type
   };
 
-  if (typeof providerConfig.base_url === 'string' && providerConfig.base_url.length > 0) {
+  if (providerConfig.type === 'openai') {
+    target.base_url =
+      typeof providerConfig.base_url === 'string' && providerConfig.base_url.length > 0
+        ? providerConfig.base_url
+        : OPENAI_DEFAULT_BASE_URL;
+  } else if (typeof providerConfig.base_url === 'string' && providerConfig.base_url.length > 0) {
     target.base_url = providerConfig.base_url;
   }
 
