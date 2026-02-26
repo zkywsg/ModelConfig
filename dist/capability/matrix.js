@@ -24,6 +24,23 @@ export function createBuiltInCapabilityMatrix() {
     }
     return matrix;
 }
+export function applyCapabilityOverrides(baseMatrix, overrides) {
+    const merged = new Map();
+    for (const [modelRef, capabilities] of baseMatrix.entries()){
+        merged.set(modelRef, new Set(capabilities));
+    }
+    if (!overrides) {
+        return merged;
+    }
+    for (const [modelRef, capabilities] of Object.entries(overrides)){
+        merged.set(modelRef, new Set(capabilities));
+    }
+    return merged;
+}
+export function createCapabilityMatrix(config) {
+    const builtIn = createBuiltInCapabilityMatrix();
+    return applyCapabilityOverrides(builtIn, config?.capabilities?.overrides);
+}
 export function getCapabilitiesForModel(matrix, modelRef) {
     return new Set(matrix.get(modelRef) ?? []);
 }
