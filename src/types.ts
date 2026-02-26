@@ -5,6 +5,10 @@ export interface ProviderConfig {
   [key: string]: unknown;
 }
 
+export type Capability = 'vision' | 'json_output' | 'tools' | 'streaming' | 'embeddings' | (string & {});
+
+export type CapabilityMatrix = Map<string, Set<Capability>>;
+
 export interface LogicalModelConfig {
   strategy: 'priority';
   candidates: string[];
@@ -31,7 +35,7 @@ export interface ProviderTarget {
 
 export interface ResolveRequest {
   model: string;
-  require?: string[];
+  require?: Capability[];
   env?: string;
 }
 
@@ -51,6 +55,6 @@ export interface ModelConfig {
   aliases?: Record<string, string>;
   capabilities?: {
     sources?: string[];
-    overrides?: Record<string, string[]>;
+    overrides?: Record<string, Capability[]>;
   };
 }
