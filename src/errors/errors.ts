@@ -6,16 +6,25 @@ export type ErrorType =
   | 'CAPABILITY_MISMATCH'
   | 'PROVIDER_NOT_CONFIGURED';
 
+const DEFAULT_RETRYABLE: Record<ErrorType, boolean> = {
+  CONFIG_INVALID: false,
+  ENV_NOT_FOUND: false,
+  MODEL_NOT_FOUND: false,
+  ALIAS_NOT_FOUND: false,
+  CAPABILITY_MISMATCH: false,
+  PROVIDER_NOT_CONFIGURED: false
+};
+
 export class ModelConfigError extends Error {
   readonly type: ErrorType;
   readonly retryable: boolean;
   readonly details?: Record<string, unknown>;
 
-  constructor(type: ErrorType, message: string, details?: Record<string, unknown>) {
+  constructor(type: ErrorType, message: string, details?: Record<string, unknown>, retryable = DEFAULT_RETRYABLE[type]) {
     super(message);
     this.name = 'ModelConfigError';
     this.type = type;
-    this.retryable = false;
+    this.retryable = retryable;
     this.details = details;
   }
 
@@ -35,8 +44,21 @@ export class ModelConfigError extends Error {
     return new ModelConfigError('ALIAS_NOT_FOUND', message, details);
   }
 
+  static capabilityMismatch(message: string, details?: Record<string, unknown>): ModelConfigError {
+    return new ModelConfigError('CAPABILITY_MISMATCH', message, details);
+  }
+
   static providerNotConfigured(message: string, details?: Record<string, unknown>): ModelConfigError {
     return new ModelConfigError('PROVIDER_NOT_CONFIGURED', message, details);
+  }
+
+  toJSON(): { type: ErrorType; message: string; retryable: boolean; details?: Record<string, unknown> } {
+    return {
+      type: this.type,
+      message: this.message,
+      retryable: this.retryable,
+      details: this.details
+    };
   }
 }
 
