@@ -29,6 +29,15 @@ export function resolve(config, request) {
         base_url: target.base_url,
         credentials_ref: target.credentials_ref,
         logical_model: logical.logical_model,
-        env: envName
+        env: envName,
+        metadata: {
+            logical_model: logical.logical_model,
+            env: envName,
+            strategy: logical.strategy,
+            required_capabilities: [
+                ...request.require ?? []
+            ],
+            selected_candidate: selectedCandidate
+        }
     };
 }

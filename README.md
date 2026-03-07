@@ -50,21 +50,28 @@ It helps you:
 
 ## Example
 
-### config.yaml
+### config.json
 
-```yaml
-environments:
-  prod:
-    providers:
-      openai:
-        type: openai
-        api_key: ${OPENAI_API_KEY}
-
-    models:
-      smart:
-        strategy: priority
-        candidates:
-          - openai:gpt-4o
+```json
+{
+  "version": 1,
+  "environments": {
+    "prod": {
+      "providers": {
+        "openai": {
+          "type": "openai",
+          "api_key": "${OPENAI_API_KEY}"
+        }
+      },
+      "models": {
+        "smart": {
+          "strategy": "priority",
+          "candidates": ["openai:gpt-4o"]
+        }
+      }
+    }
+  }
+}
 ```
 
 ---
@@ -72,7 +79,7 @@ environments:
 ### Usage
 
 ```ts
-const target = resolver.resolve({
+const target = resolver.resolve(config, {
   model: "smart",
   require: ["vision"]
 })
@@ -151,11 +158,24 @@ Execution should be handled by:
 
 ---
 
-## Installation (coming soon)
+## Quick Start
 
-```
+```bash
 npm install modelconfig
 ```
+
+### Run the local basic example
+
+```bash
+npm run example:basic
+```
+
+This example:
+
+- loads `/examples/basic/modelconfig.json`
+- resolves `smart`
+- filters by `vision` + `json_output`
+- prints a `ResolveResult` JSON payload
 
 ---
 
