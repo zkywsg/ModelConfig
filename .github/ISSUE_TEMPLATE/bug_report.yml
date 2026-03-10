@@ -1,0 +1,63 @@
+name: Bug Report
+description: Report a bug or regression in ModelConfig
+title: "[Bug]: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this template for resolver, config, capability, example, or documentation bugs.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the bug clearly.
+      placeholder: Resolver returns CAPABILITY_MISMATCH even though the model supports json_output.
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Minimal Config
+      description: Paste the smallest config that reproduces the issue.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction Steps
+      description: List the exact steps to reproduce.
+      placeholder: |
+        1. Load config
+        2. Call resolve({ model: "smart", require: ["json_output"] })
+        3. Observe the error
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Result
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Result
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: ModelConfig Version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: node
+    attributes:
+      label: Node Version
+      placeholder: 22.x / 25.x
+    validations:
+      required: true

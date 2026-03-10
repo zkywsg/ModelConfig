@@ -1,0 +1,39 @@
+name: Feature Request
+description: Propose a new resolver or configuration capability
+title: "[Feature]: "
+labels:
+  - enhancement
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keep requests aligned with ModelConfig's resolver-only scope.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem are you trying to solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Change
+      description: Describe the resolver/config behavior you want.
+    validations:
+      required: true
+  - type: textarea
+    id: non_goals
+    attributes:
+      label: Non-Goals
+      description: Clarify what should stay out of scope.
+      placeholder: This should not add request execution or gateway serving.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example Config or API Shape
+      render: json
