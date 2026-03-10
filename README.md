@@ -1,62 +1,56 @@
-<p align="center">
-  <h1 align="center">ModelConfig</h1>
-  <p align="center">
-    <b>Prisma for AI Providers</b><br/>
-    Config once. Use any model. Capability-aware.
-  </p>
-</p>
+# ModelConfig
 
-<p align="center">
-  <img src="https://img.shields.io/npm/v/modelconfig" />
-  <img src="https://img.shields.io/github/stars/yourname/modelconfig?style=social" />
-  <img src="https://img.shields.io/github/license/yourname/modelconfig" />
-</p>
+Config once. Resolve the right AI model at runtime.
 
----
+ModelConfig is a resolver-only configuration layer for multi-provider AI projects. It helps you:
 
-## Why ModelConfig?
+1. define logical models like `smart`, `cheap`, `fast`
+2. switch providers without hard-coded model names in app code
+3. select candidates by required capabilities
+4. pass the final target to OpenAI SDK, LiteLLM, or other execution layers
 
-Integrating multiple AI models today is messy:
+ModelConfig decides. Downstream tools execute.
 
-- Different configuration formats  
-- Hard-coded model names in code  
-- Feature differences between providers  
-- Environment management is painful  
-- Vendor lock-in is real  
+## What Problem It Solves
 
-**ModelConfig solves this by separating:**
+Without a resolver layer, multi-model applications usually end up with:
 
-> What your app needs  
-> from  
-> Which model should be used  
+1. hard-coded provider/model strings in business code
+2. duplicated config across environments
+3. no clean way to express fallbacks
+4. no capability-aware selection
+5. expensive migration when providers or models change
 
----
+ModelConfig moves those decisions into config.
 
-## What is ModelConfig?
+## Core Concepts
 
-ModelConfig is a **configuration and capability resolver layer** for AI providers.
+1. `providers`: concrete provider definitions like `openai` or `openai-compatible`
+2. `models`: logical model groups like `smart`
+3. `aliases`: stable names like `gpt-4o-latest`
+4. `capabilities`: model-level ability declarations like `vision` or `json_output`
+5. `resolve()`: turns a logical request into a concrete target
 
-It helps you:
+## Quick Start
 
-- Manage multiple providers with Config-as-Code  
-- Define logical models (`smart`, `cheap`, `fast`)  
-- Avoid vendor lock-in  
-- Select models based on required capabilities  
-- Work with LiteLLM, LangChain, or official SDKs  
+### Requirements
 
-**ModelConfig decides the model — it does not call it.**
+1. Node.js `>= 22`
+2. an environment variable for any provider API key referenced in config
 
----
+### 1. Install
 
-## Example
+```bash
+npm install modelconfig
+```
 
-### config.json
+### 2. Create a config file
 
 ```json
 {
   "version": 1,
   "environments": {
-    "prod": {
+    "dev": {
       "providers": {
         "openai": {
           "type": "openai",
@@ -74,158 +68,178 @@ It helps you:
 }
 ```
 
----
-
-### Usage
+### 3. Resolve a model
 
 ```ts
-const target = resolver.resolve(config, {
-  model: "smart",
-  require: ["vision"]
-})
+import { config, resolver } from "modelconfig";
 
-// pass target to LiteLLM / LangChain / OpenAI SDK
+const loaded = config.loadConfig("./modelconfig.json");
+
+const target = resolver.resolve(loaded, {
+  model: "smart",
+  require: ["json_output"],
+  env: "dev"
+});
+
+console.log(target);
 ```
 
----
+### 4. Expected output
 
-## Capability-Aware Selection
-
-```ts
-resolver.resolve({
-  model: "smart",
-  require: ["vision", "json_output"]
-})
+```json
+{
+  "provider": "openai",
+  "model": "gpt-4o",
+  "base_url": "https://api.openai.com/v1",
+  "credentials_ref": "env:OPENAI_API_KEY",
+  "logical_model": "smart",
+  "env": "dev",
+  "metadata": {
+    "logical_model": "smart",
+    "env": "dev",
+    "strategy": "priority",
+    "required_capabilities": ["json_output"],
+    "selected_candidate": "openai:gpt-4o"
+  }
+}
 ```
+
+## How Resolution Works
+
+Given:
+
+1. a logical model name
+2. an environment
+3. optional required capabilities
 
 ModelConfig will:
 
-- Filter models that support required capabilities  
-- Select the best candidate  
-- Or return a clear error if none match  
+1. load the current environment
+2. resolve the logical model
+3. expand aliases
+4. filter candidates by capability
+5. select the first valid candidate by strategy
+6. return a concrete provider/model target
 
----
+## Example Commands
 
-## Ecosystem Position
-
-```
-Application
-   ↓
-Framework (LangChain)
-   ↓
-Gateway (LiteLLM)
-   ↓
-ModelConfig   ← this project
-   ↓
-Provider SDK
-   ↓
-Model APIs
-```
-
-ModelConfig is the missing configuration layer between your app and AI providers.
-
----
-
-## Core Features
-
-- Config-as-Code  
-- Multi-environment support  
-- Logical models  
-- Model aliasing  
-- Capability matrix  
-- Capability-aware resolution  
-- OpenAI-compatible support  
-- Resolver-only architecture  
-
----
-
-## Non-Goals
-
-ModelConfig intentionally does **not** include:
-
-- HTTP calling  
-- Streaming implementation  
-- Retry logic  
-- Gateway / proxy  
-- Agent framework  
-- Monitoring platform  
-
-Execution should be handled by:
-
-- LiteLLM  
-- LangChain  
-- Official provider SDKs  
-
----
-
-## Quick Start
-
-```bash
-npm install modelconfig
-```
-
-### Run the local basic example
+### Basic example
 
 ```bash
 npm run example:basic
 ```
 
-This example:
+What it shows:
 
-- loads `/examples/basic/modelconfig.json`
-- resolves `smart`
-- filters by `vision` + `json_output`
-- prints a `ResolveResult` JSON payload
+1. config loading
+2. alias resolution
+3. capability filtering
+4. final `ResolveResult`
 
-### Run the OpenAI SDK integration example
+Files:
+
+1. [examples/basic/modelconfig.json](/Users/lauzanhing/Desktop/ModelConfig/examples/basic/modelconfig.json)
+2. [examples/basic/run.mjs](/Users/lauzanhing/Desktop/ModelConfig/examples/basic/run.mjs)
+
+### OpenAI SDK example
 
 ```bash
 npm run example:openai-sdk
 ```
 
-This example shows how to map `ResolveResult` into:
+What it shows:
 
-- `new OpenAI({ apiKey, baseURL })`
-- a `responses.create()` request payload
+1. `ResolveResult -> OpenAI client config`
+2. `credentials_ref -> apiKey`
+3. `base_url -> baseURL`
+4. `model -> responses.create()` payload
 
-### Run the LiteLLM integration example
+Files:
+
+1. [examples/with-openai-sdk/modelconfig.json](/Users/lauzanhing/Desktop/ModelConfig/examples/with-openai-sdk/modelconfig.json)
+2. [examples/with-openai-sdk/run.mjs](/Users/lauzanhing/Desktop/ModelConfig/examples/with-openai-sdk/run.mjs)
+
+### LiteLLM example
 
 ```bash
 npm run example:litellm
 ```
 
-This example shows how to map ModelConfig into:
+What it shows:
 
-- LiteLLM primary completion params
-- an ordered fallback chain for router/proxy use
+1. ordered candidate resolution
+2. primary LiteLLM completion params
+3. fallback chain generation
 
----
+Files:
+
+1. [examples/with-litellm/modelconfig.json](/Users/lauzanhing/Desktop/ModelConfig/examples/with-litellm/modelconfig.json)
+2. [examples/with-litellm/run.mjs](/Users/lauzanhing/Desktop/ModelConfig/examples/with-litellm/run.mjs)
+
+## Capability-Aware Selection
+
+```ts
+const target = resolver.resolve(loaded, {
+  model: "smart",
+  require: ["vision", "json_output"]
+});
+```
+
+If no candidate matches the requested capabilities, ModelConfig returns `CAPABILITY_MISMATCH`.
+
+## Supported Error Types
+
+1. `CONFIG_INVALID`
+2. `ENV_NOT_FOUND`
+3. `MODEL_NOT_FOUND`
+4. `ALIAS_NOT_FOUND`
+5. `CAPABILITY_MISMATCH`
+6. `PROVIDER_NOT_CONFIGURED`
+
+All errors use the same shape:
+
+```ts
+{
+  type,
+  message,
+  retryable,
+  details
+}
+```
+
+## Ecosystem Position
+
+```text
+Application
+  -> LangChain / app logic
+  -> LiteLLM / SDK client
+  -> ModelConfig
+  -> Provider API
+```
+
+ModelConfig is the decision layer, not the execution layer.
+
+## Non-Goals
+
+ModelConfig does not implement:
+
+1. HTTP requests
+2. streaming transport
+3. retry queues
+4. proxy/gateway serving
+5. agents
+6. observability or billing
 
 ## Roadmap
 
-### v0.1 (MVP)
+### v0.1
 
-- Provider configuration  
-- Environment support  
-- Logical models  
-- Model alias  
-- Basic resolver  
-
-### Next
-
-- Capability matrix  
-- Capability matching  
-- Static routing  
-- Cost estimation  
-
----
-
-## Vision
-
-Define what capability you need.  
-Let the system choose the model.
-
----
+1. provider configuration
+2. multi-environment resolution
+3. logical models
+4. aliases
+5. capability-aware selection
+6. integration examples
 
 ## License
 
