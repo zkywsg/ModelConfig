@@ -177,6 +177,17 @@ This example:
 - filters by `vision` + `json_output`
 - prints a `ResolveResult` JSON payload
 
+### Run the OpenAI SDK integration example
+
+```bash
+npm run example:openai-sdk
+```
+
+This example shows how to map `ResolveResult` into:
+
+- `new OpenAI({ apiKey, baseURL })`
+- a `responses.create()` request payload
+
 ---
 
 ## Roadmap

@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "environments": {
+    "dev": {
+      "providers": {
+        "openai": {
+          "type": "openai",
+          "api_key": "${OPENAI_API_KEY}"
+        },
+        "azure-openai-proxy": {
+          "type": "openai-compatible",
+          "base_url": "https://example-proxy.internal/v1",
+          "api_key": "${AZURE_OPENAI_PROXY_KEY}"
+        }
+      },
+      "models": {
+        "assistant": {
+          "strategy": "priority",
+          "candidates": ["assistant-latest", "azure-openai-proxy:gpt-4.1-mini"]
+        }
+      }
+    }
+  },
+  "aliases": {
+    "assistant-latest": "openai:gpt-4.1"
+  },
+  "capabilities": {
+    "overrides": {
+      "openai:gpt-4.1": ["json_output", "tools"],
+      "azure-openai-proxy:gpt-4.1-mini": ["json_output"]
+    }
+  }
+}
