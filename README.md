@@ -188,6 +188,17 @@ This example shows how to map `ResolveResult` into:
 - `new OpenAI({ apiKey, baseURL })`
 - a `responses.create()` request payload
 
+### Run the LiteLLM integration example
+
+```bash
+npm run example:litellm
+```
+
+This example shows how to map ModelConfig into:
+
+- LiteLLM primary completion params
+- an ordered fallback chain for router/proxy use
+
 ---
 
 ## Roadmap

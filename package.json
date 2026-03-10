@@ -15,7 +15,8 @@
     "build": "node ./scripts/build.mjs",
     "clean": "node -e \"import('node:fs').then(fs=>fs.rmSync('dist',{recursive:true,force:true}))\"",
     "example:basic": "npm run build && node ./examples/basic/run.mjs",
-    "example:openai-sdk": "npm run build && node ./examples/with-openai-sdk/run.mjs"
+    "example:openai-sdk": "npm run build && node ./examples/with-openai-sdk/run.mjs",
+    "example:litellm": "npm run build && node ./examples/with-litellm/run.mjs"
   },
   "engines": {
     "node": ">=22"

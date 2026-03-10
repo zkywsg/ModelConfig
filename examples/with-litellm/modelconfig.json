@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "environments": {
+    "dev": {
+      "providers": {
+        "openai": {
+          "type": "openai",
+          "api_key": "${OPENAI_API_KEY}"
+        },
+        "openrouter": {
+          "type": "openai-compatible",
+          "base_url": "https://openrouter.ai/api/v1",
+          "api_key": "${OPENROUTER_API_KEY}"
+        }
+      },
+      "models": {
+        "smart": {
+          "strategy": "priority",
+          "candidates": [
+            "smart-latest",
+            "openrouter:openai/gpt-4o-mini"
+          ]
+        }
+      }
+    }
+  },
+  "aliases": {
+    "smart-latest": "openai:gpt-4o"
+  },
+  "capabilities": {
+    "overrides": {
+      "openai:gpt-4o": ["vision", "json_output", "tools"],
+      "openrouter:openai/gpt-4o-mini": ["json_output", "streaming"]
+    }
+  }
+}
