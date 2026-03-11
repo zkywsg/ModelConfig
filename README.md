@@ -170,11 +170,13 @@ What it shows:
 1. ordered candidate resolution
 2. primary LiteLLM completion params
 3. fallback chain generation
+4. a real separation between routing decisions and execution
 
 Files:
 
 1. [examples/with-litellm/modelconfig.json](/Users/lauzanhing/Desktop/ModelConfig/examples/with-litellm/modelconfig.json)
 2. [examples/with-litellm/run.mjs](/Users/lauzanhing/Desktop/ModelConfig/examples/with-litellm/run.mjs)
+3. [docs/promotion/litellm-case-study.md](/Users/lauzanhing/Desktop/ModelConfig/docs/promotion/litellm-case-study.md)
 
 ## Capability-Aware Selection
 
