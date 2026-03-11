@@ -1,50 +1,85 @@
 # ModelConfig
 
-Config once. Resolve the right AI model at runtime.
+> Config once. Resolve the right AI model at runtime.
 
-ModelConfig is a resolver-only configuration layer for multi-provider AI projects. It helps you:
+[![MIT License](https://img.shields.io/badge/license-MIT-111111.svg)](./LICENSE)
+[![Node.js](https://img.shields.io/badge/node-%3E%3D22-3C873A.svg)](./package.json)
+[![Schema](https://img.shields.io/badge/config-JSON%20Schema-0A66C2.svg)](./config.schema.json)
+[![Examples](https://img.shields.io/badge/examples-3-blue.svg)](./examples)
 
-1. define logical models like `smart`, `cheap`, `fast`
-2. switch providers without hard-coded model names in app code
-3. select candidates by required capabilities
-4. pass the final target to OpenAI SDK, LiteLLM, or other execution layers
+ModelConfig is a resolver-only config layer for multi-provider AI apps.
 
-ModelConfig decides. Downstream tools execute.
+It lets your app ask for logical models like `smart`, `cheap`, or `assistant`, then resolves them into the right provider + concrete model + credentials reference at runtime.
 
-## What Problem It Solves
+That means you can swap providers, define fallbacks, and gate by capabilities without scattering provider strings through your business code.
 
-Without a resolver layer, multi-model applications usually end up with:
+## Why It Exists
 
-1. hard-coded provider/model strings in business code
-2. duplicated config across environments
-3. no clean way to express fallbacks
-4. no capability-aware selection
-5. expensive migration when providers or models change
+Most AI apps start like this:
+
+```ts
+const model = "gpt-4o";
+const backup = "openai/gpt-4o-mini";
+```
+
+A few weeks later, model routing is spread across the codebase:
+
+- provider names are hard-coded in application logic
+- staging and production drift apart
+- capability checks are ad hoc
+- fallback chains are duplicated
+- migrations become expensive
 
 ModelConfig moves those decisions into config.
 
-## Core Concepts
+Your app stays simple:
 
-1. `providers`: concrete provider definitions like `openai` or `openai-compatible`
-2. `models`: logical model groups like `smart`
-3. `aliases`: stable names like `gpt-4o-latest`
-4. `capabilities`: model-level ability declarations like `vision` or `json_output`
-5. `resolve()`: turns a logical request into a concrete target
+```ts
+const target = resolver.resolve(config, {
+  model: "smart",
+  require: ["json_output", "vision"],
+  env: "prod"
+});
+```
+
+## What You Get
+
+- Logical model names your app can depend on long term
+- Provider/model decoupling so migrations do not touch product code
+- Capability-aware selection such as `vision`, `tools`, or `json_output`
+- Ordered candidate resolution and fallback-friendly outputs
+- Environment-specific routing for `dev`, `staging`, and `prod`
+- Clean handoff into OpenAI SDK, LiteLLM, or your own execution layer
+- A JSON Schema-backed config format
+
+## Positioning
+
+ModelConfig is the decision layer, not the execution layer.
+
+```text
+Application / Agent / API
+          |
+          v
+      ModelConfig
+          |
+          v
+ OpenAI SDK / LiteLLM / Custom client
+          |
+          v
+      Provider APIs
+```
+
+If you already use an SDK, proxy, or router, ModelConfig fits in front of it.
 
 ## Quick Start
 
-### Requirements
-
-1. Node.js `>= 22`
-2. an environment variable for any provider API key referenced in config
-
-### 1. Install
+### Install
 
 ```bash
 npm install modelconfig
 ```
 
-### 2. Create a config file
+### Define a config
 
 ```json
 {
@@ -55,20 +90,37 @@ npm install modelconfig
         "openai": {
           "type": "openai",
           "api_key": "${OPENAI_API_KEY}"
+        },
+        "openrouter": {
+          "type": "openai-compatible",
+          "base_url": "https://openrouter.ai/api/v1",
+          "api_key": "${OPENROUTER_API_KEY}"
         }
       },
       "models": {
         "smart": {
           "strategy": "priority",
-          "candidates": ["openai:gpt-4o"]
+          "candidates": [
+            "smart-latest",
+            "openrouter:openai/gpt-4o-mini"
+          ]
         }
       }
+    }
+  },
+  "aliases": {
+    "smart-latest": "openai:gpt-4o"
+  },
+  "capabilities": {
+    "overrides": {
+      "openai:gpt-4o": ["vision", "json_output", "tools"],
+      "openrouter:openai/gpt-4o-mini": ["json_output", "streaming"]
     }
   }
 }
 ```
 
-### 3. Resolve a model
+### Resolve at runtime
 
 ```ts
 import { config, resolver } from "modelconfig";
@@ -77,14 +129,14 @@ const loaded = config.loadConfig("./modelconfig.json");
 
 const target = resolver.resolve(loaded, {
   model: "smart",
-  require: ["json_output"],
+  require: ["vision", "json_output"],
   env: "dev"
 });
 
 console.log(target);
 ```
 
-### 4. Expected output
+### Result
 
 ```json
 {
@@ -98,107 +150,124 @@ console.log(target);
     "logical_model": "smart",
     "env": "dev",
     "strategy": "priority",
-    "required_capabilities": ["json_output"],
+    "required_capabilities": ["vision", "json_output"],
     "selected_candidate": "openai:gpt-4o"
   }
 }
 ```
 
-## How Resolution Works
+## The Core Idea
 
-Given:
+Instead of writing app code against vendor model IDs, write against intent:
 
-1. a logical model name
-2. an environment
-3. optional required capabilities
+| App asks for | ModelConfig decides | Execution layer does |
+| --- | --- | --- |
+| `smart` | which provider/model fits | sends the request |
+| `cheap` | best low-cost candidate | sends the request |
+| `vision` + `json_output` | which target supports both | sends the request |
 
-ModelConfig will:
+This separation matters when you need to:
 
-1. load the current environment
-2. resolve the logical model
-3. expand aliases
-4. filter candidates by capability
-5. select the first valid candidate by strategy
-6. return a concrete provider/model target
+- move from one provider to another
+- introduce an internal proxy
+- add a cheaper fallback
+- split environments cleanly
+- support capability-based routing
 
-## Example Commands
+## Use Cases
 
-### Basic example
+### 1. Stable app code, changing providers
+
+Keep application code pinned to `assistant`, while config decides whether that means `openai:gpt-4.1` today or a proxy-backed deployment tomorrow.
+
+### 2. Capability-aware routing
+
+Require `vision` or `tools` only when needed, and fail with a clear typed error if nothing matches.
+
+### 3. LiteLLM or gateway frontends
+
+Use ModelConfig to produce the primary target and ordered fallbacks, then let LiteLLM or your gateway handle retries and execution.
+
+### 4. Multi-environment AI stacks
+
+Run one routing policy in `dev`, a different one in `prod`, and keep both in the same schema-driven config system.
+
+## Examples
+
+### Basic
+
+Minimal end-to-end flow:
+
+- load config
+- resolve a logical model
+- expand aliases
+- filter by capabilities
+- print the final `ResolveResult`
+
+Run:
 
 ```bash
 npm run example:basic
 ```
 
-What it shows:
-
-1. config loading
-2. alias resolution
-3. capability filtering
-4. final `ResolveResult`
-
 Files:
 
-1. [examples/basic/modelconfig.json](/Users/lauzanhing/Desktop/ModelConfig/examples/basic/modelconfig.json)
-2. [examples/basic/run.mjs](/Users/lauzanhing/Desktop/ModelConfig/examples/basic/run.mjs)
+- [`examples/basic/modelconfig.json`](./examples/basic/modelconfig.json)
+- [`examples/basic/run.mjs`](./examples/basic/run.mjs)
 
-### OpenAI SDK example
+### OpenAI SDK
+
+Shows how to transform a `ResolveResult` into OpenAI client config and a `responses.create()` payload.
+
+Run:
 
 ```bash
 npm run example:openai-sdk
 ```
 
-What it shows:
-
-1. `ResolveResult -> OpenAI client config`
-2. `credentials_ref -> apiKey`
-3. `base_url -> baseURL`
-4. `model -> responses.create()` payload
-
 Files:
 
-1. [examples/with-openai-sdk/modelconfig.json](/Users/lauzanhing/Desktop/ModelConfig/examples/with-openai-sdk/modelconfig.json)
-2. [examples/with-openai-sdk/run.mjs](/Users/lauzanhing/Desktop/ModelConfig/examples/with-openai-sdk/run.mjs)
+- [`examples/with-openai-sdk/modelconfig.json`](./examples/with-openai-sdk/modelconfig.json)
+- [`examples/with-openai-sdk/run.mjs`](./examples/with-openai-sdk/run.mjs)
 
-### LiteLLM example
+### LiteLLM
+
+Shows how to convert ModelConfig output into primary LiteLLM params plus a fallback chain.
+
+Run:
 
 ```bash
 npm run example:litellm
 ```
 
-What it shows:
-
-1. ordered candidate resolution
-2. primary LiteLLM completion params
-3. fallback chain generation
-4. a real separation between routing decisions and execution
-
 Files:
 
-1. [examples/with-litellm/modelconfig.json](/Users/lauzanhing/Desktop/ModelConfig/examples/with-litellm/modelconfig.json)
-2. [examples/with-litellm/run.mjs](/Users/lauzanhing/Desktop/ModelConfig/examples/with-litellm/run.mjs)
-3. [docs/promotion/litellm-case-study.md](/Users/lauzanhing/Desktop/ModelConfig/docs/promotion/litellm-case-study.md)
+- [`examples/with-litellm/modelconfig.json`](./examples/with-litellm/modelconfig.json)
+- [`examples/with-litellm/run.mjs`](./examples/with-litellm/run.mjs)
 
-## Capability-Aware Selection
+## Resolution Flow
 
-```ts
-const target = resolver.resolve(loaded, {
-  model: "smart",
-  require: ["vision", "json_output"]
-});
-```
+When you call `resolve()`, ModelConfig:
 
-If no candidate matches the requested capabilities, ModelConfig returns `CAPABILITY_MISMATCH`.
+1. loads the selected environment
+2. finds the logical model definition
+3. expands aliases into concrete `provider:model` targets
+4. filters candidates by required capabilities
+5. applies the model strategy
+6. returns a concrete target for downstream execution
 
-## Supported Error Types
+## Error Model
 
-1. `CONFIG_INVALID`
-2. `ENV_NOT_FOUND`
-3. `MODEL_NOT_FOUND`
-4. `ALIAS_NOT_FOUND`
-5. `CAPABILITY_MISMATCH`
-6. `PROVIDER_NOT_CONFIGURED`
+Errors are typed and explicit:
 
-All errors use the same shape:
+- `CONFIG_INVALID`
+- `ENV_NOT_FOUND`
+- `MODEL_NOT_FOUND`
+- `ALIAS_NOT_FOUND`
+- `CAPABILITY_MISMATCH`
+- `PROVIDER_NOT_CONFIGURED`
+
+All errors share the same shape:
 
 ```ts
 {
@@ -209,39 +278,71 @@ All errors use the same shape:
 }
 ```
 
-## Ecosystem Position
+## API Surface
 
-```text
-Application
-  -> LangChain / app logic
-  -> LiteLLM / SDK client
-  -> ModelConfig
-  -> Provider API
+```ts
+import { config, resolver, capability, model, provider, errors } from "modelconfig";
 ```
 
-ModelConfig is the decision layer, not the execution layer.
+Main entry points:
+
+- `config.loadConfig(path)`
+- `resolver.resolve(config, request)`
 
 ## Non-Goals
 
-ModelConfig does not implement:
+ModelConfig does not try to be:
 
-1. HTTP requests
-2. streaming transport
-3. retry queues
-4. proxy/gateway serving
-5. agents
-6. observability or billing
+- an inference SDK
+- a proxy or gateway server
+- a retry engine
+- a streaming transport
+- an agent framework
+- an observability platform
+
+That constraint is intentional. It keeps the library small, composable, and easy to trust.
+
+## Why People Star Projects Like This
+
+- It solves a real integration pain without forcing a platform rewrite
+- It is small enough to understand quickly
+- It works with the tools teams already use
+- It turns messy AI routing logic into a clean config contract
+
+If that is your problem space, this repo is built for you.
+
+## Development
+
+Requirements:
+
+- Node.js `>= 22`
+
+Useful commands:
+
+```bash
+npm run build
+npm test
+npm run example:basic
+npm run example:openai-sdk
+npm run example:litellm
+```
 
 ## Roadmap
 
-### v0.1
+Current `v0.1.0` scope:
 
-1. provider configuration
-2. multi-environment resolution
-3. logical models
-4. aliases
-5. capability-aware selection
-6. integration examples
+- provider configuration
+- logical models
+- aliases
+- capability-aware selection
+- multi-environment resolution
+- integration examples
+
+## Contributing
+
+Issues and PRs are welcome.
+
+If you are building multi-provider AI systems and hit rough edges, open an issue with your routing use case. Those reports are the fastest way to make the resolver more useful.
 
 ## License
 
