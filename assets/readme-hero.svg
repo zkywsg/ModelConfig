@@ -1,0 +1,80 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ModelConfig README hero</title>
+  <desc id="desc">A dark technical banner showing logical model resolution flowing through ModelConfig into a concrete provider target.</desc>
+  <defs>
+    <linearGradient id="bg" x1="150" y1="40" x2="1040" y2="590" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B1017"/>
+      <stop offset="1" stop-color="#111927"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="177" y1="120" x2="960" y2="488" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#121A26"/>
+      <stop offset="1" stop-color="#0E1622"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="218" y1="170" x2="945" y2="444" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#73B5FF"/>
+      <stop offset="1" stop-color="#46D7C4"/>
+    </linearGradient>
+    <filter id="shadow" x="120" y="83" width="960" height="464" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="18"/>
+      <feGaussianBlur stdDeviation="28"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0196078 0 0 0 0 0.0470588 0 0 0 0 0.0862745 0 0 0 0.45 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_2"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_2" result="shape"/>
+    </filter>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M36 0H0V36" stroke="#1E293B" stroke-opacity="0.55"/>
+    </pattern>
+    <style>
+      .label { fill: #8EA0B8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 16px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .title { fill: #F8FBFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 52px; font-weight: 700; }
+      .tagline { fill: #BDD1E8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 24px; }
+      .card-title { fill: #EAF2FB; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 23px; font-weight: 600; }
+      .mono { fill: #D8E6F6; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size: 19px; }
+      .meta { fill: #91A6BE; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 17px; }
+      .mini { fill: #6FD4FF; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size: 16px; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <circle cx="1057" cy="102" r="132" fill="#15324D" fill-opacity="0.22"/>
+  <circle cx="135" cy="580" r="170" fill="#12283E" fill-opacity="0.28"/>
+  <circle cx="938" cy="521" r="116" fill="#103247" fill-opacity="0.18"/>
+
+  <g filter="url(#shadow)">
+    <rect x="148" y="111" width="904" height="408" rx="28" fill="url(#panel)" stroke="#243247" stroke-width="1.5"/>
+    <rect x="148" y="111" width="904" height="408" rx="28" fill="url(#grid)" fill-opacity="0.4"/>
+  </g>
+
+  <text x="210" y="181" class="label">Model Routing, Reframed</text>
+  <text x="210" y="245" class="title">ModelConfig</text>
+  <text x="210" y="287" class="tagline">The decision layer between your app and model providers.</text>
+
+  <rect x="210" y="340" width="224" height="118" rx="22" fill="#101A28" stroke="#2C3E56"/>
+  <text x="238" y="375" class="label">App asks for</text>
+  <text x="238" y="412" class="card-title">Logical intent</text>
+  <text x="238" y="445" class="mono">smart + vision + json_output</text>
+
+  <rect x="487" y="318" width="226" height="162" rx="24" fill="#0E1724" stroke="#355277"/>
+  <rect x="507" y="341" width="186" height="10" rx="5" fill="url(#accent)" fill-opacity="0.75"/>
+  <text x="522" y="387" class="label">Decision layer</text>
+  <text x="522" y="423" class="card-title">ModelConfig</text>
+  <text x="522" y="456" class="meta">aliases -> capabilities -> strategy</text>
+
+  <rect x="766" y="340" width="224" height="118" rx="22" fill="#101A28" stroke="#2C3E56"/>
+  <text x="794" y="375" class="label">Returns</text>
+  <text x="794" y="412" class="card-title">Concrete target</text>
+  <text x="794" y="445" class="mono">openai:gpt-4o</text>
+
+  <path d="M434 399H487" stroke="url(#accent)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M713 399H766" stroke="url(#accent)" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="462" cy="399" r="5" fill="#73B5FF"/>
+  <circle cx="740" cy="399" r="5" fill="#46D7C4"/>
+
+  <text x="211" y="491" class="mini">logical-models</text>
+  <text x="352" y="491" class="mini">capability-aware</text>
+  <text x="523" y="491" class="mini">provider-portable</text>
+</svg>

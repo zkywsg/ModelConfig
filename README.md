@@ -1,60 +1,69 @@
 # ModelConfig
 
-> Config once. Resolve the right AI model at runtime.
+> Resolve intent, not vendor strings.
 
-[![MIT License](https://img.shields.io/badge/license-MIT-111111.svg)](./LICENSE)
-[![Node.js](https://img.shields.io/badge/node-%3E%3D22-3C873A.svg)](./package.json)
-[![Schema](https://img.shields.io/badge/config-JSON%20Schema-0A66C2.svg)](./config.schema.json)
-[![Examples](https://img.shields.io/badge/examples-3-blue.svg)](./examples)
+[Quick Start](#quick-start) · [Proof It Works](#proof-it-works) · [Schema](./config.schema.json) · [Contributing](./CONTRIBUTING.md)
 
-ModelConfig is a resolver-only config layer for multi-provider AI apps.
+`MIT` · `Node >=22` · `JSON Schema` · `3 runnable examples` · `Resolver-only`
 
-It lets your app ask for logical models like `smart`, `cheap`, or `assistant`, then resolves them into the right provider + concrete model + credentials reference at runtime.
+![ModelConfig hero](./assets/readme-hero.svg)
 
-That means you can swap providers, define fallbacks, and gate by capabilities without scattering provider strings through your business code.
+ModelConfig is the missing decision layer between your app and model providers.
 
-## Why It Exists
+Ask for logical models like `smart`, `assistant`, or `cheap`. Get back a concrete provider target, model ID, base URL, and credentials reference that your execution layer can use immediately.
 
-Most AI apps start like this:
+It keeps provider churn, fallback policy, capability gating, and environment drift out of application code, while fitting cleanly in front of OpenAI SDK, LiteLLM, or a custom client.
+
+---
+
+## Why This Exists
+
+Multi-provider AI apps usually start simple, then collapse into scattered routing logic:
 
 ```ts
-const model = "gpt-4o";
-const backup = "openai/gpt-4o-mini";
+const model = wantsVision ? "gpt-4o" : "gpt-4o-mini";
+const backup = env === "prod"
+  ? "openai/gpt-4o-mini"
+  : "openrouter/openai/gpt-4o-mini";
 ```
 
-A few weeks later, model routing is spread across the codebase:
+That approach leaks vendor strings into product code, duplicates fallback policy, and makes every provider migration more expensive than it should be.
 
-- provider names are hard-coded in application logic
-- staging and production drift apart
-- capability checks are ad hoc
-- fallback chains are duplicated
-- migrations become expensive
-
-ModelConfig moves those decisions into config.
-
-Your app stays simple:
+With ModelConfig, application code stays focused on intent:
 
 ```ts
 const target = resolver.resolve(config, {
   model: "smart",
-  require: ["json_output", "vision"],
+  require: ["vision", "json_output"],
   env: "prod"
 });
 ```
 
-## What You Get
+| Without ModelConfig | With ModelConfig |
+| --- | --- |
+| Vendor IDs live in app code | App code asks for intent |
+| Fallbacks are duplicated | Fallback order lives in config |
+| Capability checks are ad hoc | Capabilities are explicit inputs |
+| Provider migration touches product code | Provider migration stays in config |
+| Environments drift over time | Environments share one schema-backed model |
 
-- Logical model names your app can depend on long term
-- Provider/model decoupling so migrations do not touch product code
-- Capability-aware selection such as `vision`, `tools`, or `json_output`
-- Ordered candidate resolution and fallback-friendly outputs
-- Environment-specific routing for `dev`, `staging`, and `prod`
-- Clean handoff into OpenAI SDK, LiteLLM, or your own execution layer
-- A JSON Schema-backed config format
+---
 
-## Positioning
+## What Makes It Different
 
-ModelConfig is the decision layer, not the execution layer.
+| Capability | What it buys you |
+| --- | --- |
+| Resolver-only design | ModelConfig decides what to call, but never performs the request itself. |
+| Logical model abstraction | Your code depends on stable names like `smart` and `assistant`, not provider-specific IDs. |
+| Capability-aware routing | Require `vision`, `tools`, or `json_output` and resolve only valid candidates. |
+| Provider portability | Move between OpenAI, proxies, and compatible endpoints without rewriting product logic. |
+| Downstream-friendly output | Hand the result to OpenAI SDK, LiteLLM, or your own execution layer. |
+
+---
+
+## How It Fits Your Stack
+
+ModelConfig sits between product logic and whatever actually executes inference.
 
 ```text
 Application / Agent / API
@@ -69,17 +78,19 @@ Application / Agent / API
       Provider APIs
 ```
 
-If you already use an SDK, proxy, or router, ModelConfig fits in front of it.
+That boundary is the point: routing policy stays centralized, while execution remains in the tool you already trust.
+
+---
 
 ## Quick Start
 
-### Install
+### 1. Install
 
 ```bash
 npm install modelconfig
 ```
 
-### Define a config
+### 2. Define your routing policy
 
 ```json
 {
@@ -120,7 +131,7 @@ npm install modelconfig
 }
 ```
 
-### Resolve at runtime
+### 3. Resolve at runtime
 
 ```ts
 import { config, resolver } from "modelconfig";
@@ -136,7 +147,7 @@ const target = resolver.resolve(loaded, {
 console.log(target);
 ```
 
-### Result
+### 4. Receive a concrete target
 
 ```json
 {
@@ -156,109 +167,52 @@ console.log(target);
 }
 ```
 
-## The Core Idea
+Pass that result directly into the execution layer you already use. ModelConfig makes the decision; downstream tools perform the call.
 
-Instead of writing app code against vendor model IDs, write against intent:
-
-| App asks for | ModelConfig decides | Execution layer does |
-| --- | --- | --- |
-| `smart` | which provider/model fits | sends the request |
-| `cheap` | best low-cost candidate | sends the request |
-| `vision` + `json_output` | which target supports both | sends the request |
-
-This separation matters when you need to:
-
-- move from one provider to another
-- introduce an internal proxy
-- add a cheaper fallback
-- split environments cleanly
-- support capability-based routing
+---
 
 ## Use Cases
 
-### 1. Stable app code, changing providers
+### Multi-provider routing without vendor lock-in
 
-Keep application code pinned to `assistant`, while config decides whether that means `openai:gpt-4.1` today or a proxy-backed deployment tomorrow.
+Keep product code pinned to logical names while config decides whether `assistant` means OpenAI today, a proxy tomorrow, or a different compatible endpoint next quarter.
 
-### 2. Capability-aware routing
+### Proxy and gateway migrations without rewrites
 
-Require `vision` or `tools` only when needed, and fail with a clear typed error if nothing matches.
+Insert an internal proxy or hosted router without editing every call site that currently embeds provider-specific model strings.
 
-### 3. LiteLLM or gateway frontends
+### Capability-based selection when requests are not equal
 
-Use ModelConfig to produce the primary target and ordered fallbacks, then let LiteLLM or your gateway handle retries and execution.
+Only require `vision`, `tools`, or `json_output` when the request actually needs them, and fail with a typed error if no candidate qualifies.
 
-### 4. Multi-environment AI stacks
+### Environment-specific policy without drift
 
-Run one routing policy in `dev`, a different one in `prod`, and keep both in the same schema-driven config system.
+Use one policy in `dev`, a stricter or cheaper policy in `prod`, and keep both inside the same config contract.
 
-## Examples
+---
 
-### Basic
+## Proof It Works
 
-Minimal end-to-end flow:
+| Scenario | Command | What it proves |
+| --- | --- | --- |
+| Base resolution flow | `npm run example:basic` | Alias expansion, capability filtering, and final `ResolveResult` generation |
+| OpenAI SDK handoff | `npm run example:openai-sdk` | `ResolveResult` can be mapped into client config and request payloads |
+| LiteLLM routing | `npm run example:litellm` | Primary target selection plus ordered fallback chain generation |
 
-- load config
-- resolve a logical model
-- expand aliases
-- filter by capabilities
-- print the final `ResolveResult`
-
-Run:
-
-```bash
-npm run example:basic
-```
-
-Files:
+Relevant files:
 
 - [`examples/basic/modelconfig.json`](./examples/basic/modelconfig.json)
 - [`examples/basic/run.mjs`](./examples/basic/run.mjs)
-
-### OpenAI SDK
-
-Shows how to transform a `ResolveResult` into OpenAI client config and a `responses.create()` payload.
-
-Run:
-
-```bash
-npm run example:openai-sdk
-```
-
-Files:
-
 - [`examples/with-openai-sdk/modelconfig.json`](./examples/with-openai-sdk/modelconfig.json)
 - [`examples/with-openai-sdk/run.mjs`](./examples/with-openai-sdk/run.mjs)
-
-### LiteLLM
-
-Shows how to convert ModelConfig output into primary LiteLLM params plus a fallback chain.
-
-Run:
-
-```bash
-npm run example:litellm
-```
-
-Files:
-
 - [`examples/with-litellm/modelconfig.json`](./examples/with-litellm/modelconfig.json)
 - [`examples/with-litellm/run.mjs`](./examples/with-litellm/run.mjs)
 
-## Resolution Flow
+---
 
-When you call `resolve()`, ModelConfig:
+## Typed Failures, Not Guesswork
 
-1. loads the selected environment
-2. finds the logical model definition
-3. expands aliases into concrete `provider:model` targets
-4. filters candidates by required capabilities
-5. applies the model strategy
-6. returns a concrete target for downstream execution
-
-## Error Model
-
-Errors are typed and explicit:
+Errors are explicit and stable:
 
 - `CONFIG_INVALID`
 - `ENV_NOT_FOUND`
@@ -267,7 +221,7 @@ Errors are typed and explicit:
 - `CAPABILITY_MISMATCH`
 - `PROVIDER_NOT_CONFIGURED`
 
-All errors share the same shape:
+All errors share the same contract:
 
 ```ts
 {
@@ -278,38 +232,24 @@ All errors share the same shape:
 }
 ```
 
-## API Surface
+When resolution fails, you know whether the issue came from config shape, environment lookup, alias expansion, capability mismatch, or provider registration.
 
-```ts
-import { config, resolver, capability, model, provider, errors } from "modelconfig";
-```
+---
 
-Main entry points:
+## Design Constraints
 
-- `config.loadConfig(path)`
-- `resolver.resolve(config, request)`
-
-## Non-Goals
-
-ModelConfig does not try to be:
+ModelConfig is intentionally narrow. It does not try to be:
 
 - an inference SDK
 - a proxy or gateway server
 - a retry engine
 - a streaming transport
 - an agent framework
-- an observability platform
+- an observability or billing layer
 
-That constraint is intentional. It keeps the library small, composable, and easy to trust.
+That constraint is what keeps it composable. It solves one problem: choosing the right model target at runtime, cleanly and predictably.
 
-## Why People Star Projects Like This
-
-- It solves a real integration pain without forcing a platform rewrite
-- It is small enough to understand quickly
-- It works with the tools teams already use
-- It turns messy AI routing logic into a clean config contract
-
-If that is your problem space, this repo is built for you.
+---
 
 ## Development
 
@@ -327,22 +267,24 @@ npm run example:openai-sdk
 npm run example:litellm
 ```
 
-## Roadmap
+Package surface:
 
-Current `v0.1.0` scope:
+```ts
+import { config, resolver, capability, model, provider, errors } from "modelconfig";
+```
 
-- provider configuration
-- logical models
-- aliases
-- capability-aware selection
-- multi-environment resolution
-- integration examples
+Main entry points:
+
+- `config.loadConfig(path)`
+- `resolver.resolve(config, request)`
+
+---
 
 ## Contributing
 
 Issues and PRs are welcome.
 
-If you are building multi-provider AI systems and hit rough edges, open an issue with your routing use case. Those reports are the fastest way to make the resolver more useful.
+If you are building multi-provider AI systems and you hit an awkward routing edge case, open an issue with the exact scenario. Those real integration constraints are the fastest way to make the resolver sharper.
 
 ## License
 
