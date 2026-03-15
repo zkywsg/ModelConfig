@@ -1,0 +1,80 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">ModelConfig social preview</title>
+  <desc id="desc">A social preview image for ModelConfig showing a premium dark technical layout and model routing flow.</desc>
+  <defs>
+    <linearGradient id="bg" x1="112" y1="32" x2="1124" y2="608" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#091019"/>
+      <stop offset="1" stop-color="#121B2A"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="324" y1="294" x2="962" y2="396" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#79B8FF"/>
+      <stop offset="1" stop-color="#4EE0C3"/>
+    </linearGradient>
+    <filter id="panelShadow" x="120" y="110" width="1040" height="420" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="18"/>
+      <feGaussianBlur stdDeviation="26"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.0117647 0 0 0 0 0.0313726 0 0 0 0 0.0705882 0 0 0 0.42 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_1_2"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_1_2" result="shape"/>
+    </filter>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" stroke="#1C2A3D" stroke-opacity="0.55"/>
+    </pattern>
+    <style>
+      .eyebrow { fill: #8EA0B8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 16px; letter-spacing: 0.14em; text-transform: uppercase; }
+      .title { fill: #F8FBFF; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 68px; font-weight: 700; }
+      .subtitle { fill: #CAD7E6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 27px; }
+      .pill { fill: #9EB7D2; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size: 18px; }
+      .cardLabel { fill: #90A6C0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 15px; letter-spacing: 0.08em; text-transform: uppercase; }
+      .cardTitle { fill: #EEF5FD; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 25px; font-weight: 600; }
+      .mono { fill: #DDEAF8; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace; font-size: 21px; }
+    </style>
+  </defs>
+
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <rect width="1280" height="640" fill="url(#grid)"/>
+  <circle cx="1145" cy="96" r="140" fill="#12324A" fill-opacity="0.22"/>
+  <circle cx="146" cy="582" r="180" fill="#11263B" fill-opacity="0.3"/>
+  <circle cx="998" cy="554" r="108" fill="#12354F" fill-opacity="0.16"/>
+
+  <g filter="url(#panelShadow)">
+    <rect x="160" y="128" width="960" height="384" rx="30" fill="#0E1724" stroke="#223146" stroke-width="1.5"/>
+    <rect x="160" y="128" width="960" height="384" rx="30" fill="url(#grid)" fill-opacity="0.35"/>
+  </g>
+
+  <text x="220" y="188" class="eyebrow">Config-driven model routing</text>
+  <text x="220" y="268" class="title">ModelConfig</text>
+  <text x="220" y="314" class="subtitle">Resolve intent, not vendor strings.</text>
+  <text x="220" y="352" class="subtitle">For multi-provider AI apps that need cleaner routing decisions.</text>
+
+  <rect x="220" y="387" width="164" height="40" rx="20" fill="#132032" stroke="#29415B"/>
+  <text x="248" y="412" class="pill">Node &gt;=22</text>
+  <rect x="396" y="387" width="164" height="40" rx="20" fill="#132032" stroke="#29415B"/>
+  <text x="425" y="412" class="pill">JSON Schema</text>
+  <rect x="572" y="387" width="186" height="40" rx="20" fill="#132032" stroke="#29415B"/>
+  <text x="602" y="412" class="pill">Resolver-only</text>
+
+  <rect x="220" y="454" width="240" height="96" rx="22" fill="#101B2A" stroke="#2B3E58"/>
+  <text x="248" y="488" class="cardLabel">App asks for</text>
+  <text x="248" y="521" class="cardTitle">Logical intent</text>
+  <text x="248" y="546" class="mono">smart + vision</text>
+
+  <rect x="520" y="434" width="242" height="116" rx="24" fill="#0F1826" stroke="#355277"/>
+  <rect x="544" y="458" width="194" height="10" rx="5" fill="url(#accent)" fill-opacity="0.85"/>
+  <text x="555" y="497" class="cardLabel">Decision layer</text>
+  <text x="555" y="530" class="cardTitle">ModelConfig</text>
+  <text x="555" y="555" class="mono">aliases -&gt; capabilities</text>
+
+  <rect x="822" y="454" width="238" height="96" rx="22" fill="#101B2A" stroke="#2B3E58"/>
+  <text x="850" y="488" class="cardLabel">Returns</text>
+  <text x="850" y="521" class="cardTitle">Concrete target</text>
+  <text x="850" y="546" class="mono">openai:gpt-4o</text>
+
+  <path d="M460 503H520" stroke="url(#accent)" stroke-width="3" stroke-linecap="round"/>
+  <path d="M762 503H822" stroke="url(#accent)" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="490" cy="503" r="5" fill="#79B8FF"/>
+  <circle cx="792" cy="503" r="5" fill="#4EE0C3"/>
+</svg>
